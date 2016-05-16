@@ -7,6 +7,8 @@ use std::fs::File;
 use std::io::{self, Read};
 use std::path::Path;
 
+use opcode::OpCode;
+
 /// How many bytes of system memory there are
 pub const MEMORY_LENGTH: usize = 0xFFF;
 /// How many items our stack holds
@@ -64,7 +66,7 @@ pub struct Cpu {
     pub stack_pointer: usize,
     /// the call stack, stores return addresses from subroutines
     pub stack: [u16; STACK_LENGTH],
-    /// strictly for early testing, will be removed later
+    /// use this to know if the PC is past the end of the program
     pub program_length: usize,
 }
 
@@ -123,5 +125,25 @@ impl Cpu {
             stack: [0u16; STACK_LENGTH],
             program_length: buf.len(),
         })
+    }
+
+    /// Fetches one opcode from memory and executes it.
+    pub fn fetch_and_execute(&mut self) -> bool {
+        // if the program counter is past the program, then we've completed execution
+        if self.program_counter >= USER_PROGRAM_START_ADDR + self.program_length {
+            return false;
+        }
+
+        // fetch the instruction and execute it
+        let instruction = ((self.memory[self.program_counter] as u16) << 8) | (self.memory[self.program_counter + 1] as u16);
+        let opcode = match OpCode::from_u16(instruction) {
+            Some(o) => o,
+            None => panic!("Error! Unimplemented opcode 0x{:4X}", instruction),
+        };
+
+        println!("{}", opcode.disasm_str);
+        (opcode.operation)(&opcode.args, &mut *self);
+
+        true
     }
 }
