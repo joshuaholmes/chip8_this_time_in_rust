@@ -1,0 +1,4 @@
+[root]
+name = "chip8_this_time_in_rust"
+version = "0.1.0"
+
