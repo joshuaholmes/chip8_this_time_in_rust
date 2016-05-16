@@ -9,7 +9,8 @@ mod cpu;
 mod opcode;
 mod display;
 
-use cpu::Cpu;
+use cpu::*;
+use opcode::*;
 
 fn main() {
     // get the program filename from the commandline and load it up
@@ -22,4 +23,18 @@ fn main() {
     };
 
     println!("Done loading user program.");
+
+    // testing -- let's disassemble the whole program to see if the 
+    // opcode lookups and disassembly strings are working as intended
+    let num_instructions = cpu.program_length / 2;
+    println!("Program disassembly:");
+
+    for i in 0..num_instructions {
+        let index = (i * 2) + USER_PROGRAM_START_ADDR;
+        let instruction = ((cpu.memory[index] as u16) << 8) | (cpu.memory[index + 1] as u16);
+        //println!("Opcode: 0x{:04X}", instruction);
+
+        let opcode = OpCode::from_u16(instruction).unwrap();
+        println!("{}", opcode.disasm_str);
+    }
 }

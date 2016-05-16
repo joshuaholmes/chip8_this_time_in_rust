@@ -67,29 +67,29 @@ impl OpCode {
                 match opcode {
                     0x00E0 => Some(OpCode::new(opcode, args, "CLS".to_owned(), OpCode::opcode_cls)),
                     0x00EE => Some(OpCode::new(opcode, args, "RET".to_owned(), OpCode::opcode_ret)),
-                    _ => Some(OpCode::new(opcode, args, format!("SYS {:3X}", args.nnn), OpCode::opcode_sys))
+                    _ => Some(OpCode::new(opcode, args, format!("SYS {:03X}", args.nnn), OpCode::opcode_sys))
                 }
             },
             0x1000 => {
-                Some(OpCode::new(opcode, args, format!("JP {:3X}", args.nnn), OpCode::opcode_jp_addr))
+                Some(OpCode::new(opcode, args, format!("JP {:03X}", args.nnn), OpCode::opcode_jp_addr))
             },
             0x2000 => {
-                Some(OpCode::new(opcode, args, format!("CALL {:3X}", args.nnn), OpCode::opcode_call_addr))
+                Some(OpCode::new(opcode, args, format!("CALL {:03X}", args.nnn), OpCode::opcode_call_addr))
             },
             0x3000 => {
-                Some(OpCode::new(opcode, args, format!("SE V{:X}, {:2X}", args.x, args.kk), OpCode::opcode_se_vx_byte))
+                Some(OpCode::new(opcode, args, format!("SE V{:X}, {:02X}", args.x, args.kk), OpCode::opcode_se_vx_byte))
             },
             0x4000 => {
-                Some(OpCode::new(opcode, args, format!("SNE V{:X}, {:2X}", args.x, args.kk), OpCode::opcode_sne_vx_byte))
+                Some(OpCode::new(opcode, args, format!("SNE V{:X}, {:02X}", args.x, args.kk), OpCode::opcode_sne_vx_byte))
             },
             0x5000 => {
                 Some(OpCode::new(opcode, args, format!("SE V{:X}, V{:X}", args.x, args.y), OpCode::opcode_sne_vx_vy))
             },
             0x6000 => {
-                Some(OpCode::new(opcode, args, format!("LD V{:X}, {:2X}", args.x, args.kk), OpCode::opcode_ld_vx_byte))
+                Some(OpCode::new(opcode, args, format!("LD V{:X}, {:02X}", args.x, args.kk), OpCode::opcode_ld_vx_byte))
             },
             0x7000 => {
-                Some(OpCode::new(opcode, args, format!("ADD V{:X}, {:2X}", args.x, args.kk), OpCode::opcode_add_vx_byte))
+                Some(OpCode::new(opcode, args, format!("ADD V{:X}, {:02X}", args.x, args.kk), OpCode::opcode_add_vx_byte))
             },
             0x8000 => {
                 match args.n {
@@ -112,13 +112,13 @@ impl OpCode {
                 }
             },
             0xA000 => {
-                Some(OpCode::new(opcode, args, format!("LD I, {:3X}", args.nnn), OpCode::opcode_ld_i_addr))
+                Some(OpCode::new(opcode, args, format!("LD I, {:03X}", args.nnn), OpCode::opcode_ld_i_addr))
             },
             0xB000 => {
-                Some(OpCode::new(opcode, args, format!("JP V0, {:3X}", args.nnn), OpCode::opcode_jp_v0_addr))
+                Some(OpCode::new(opcode, args, format!("JP V0, {:03X}", args.nnn), OpCode::opcode_jp_v0_addr))
             },
             0xC000 => {
-                Some(OpCode::new(opcode, args, format!("RND V{:X}, {:2X}", args.x, args.kk), OpCode::opcode_rnd_vx_byte))
+                Some(OpCode::new(opcode, args, format!("RND V{:X}, {:02X}", args.x, args.kk), OpCode::opcode_rnd_vx_byte))
             },
             0xD000 => {
                 Some(OpCode::new(opcode, args, format!("DRW V{:X}, V{:X}, {:X}", args.x, args.y, args.n), OpCode::opcode_drw_vx_vy_nibble))

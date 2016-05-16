@@ -58,12 +58,14 @@ pub struct Cpu {
     pub delay_timer: u8,
     /// the sound timer, decreased at 60Hz by default when non-zero
     pub sound_timer: u8,
-    // the program counter, points to the current instruction in memory
+    /// the program counter, points to the current instruction in memory
     pub program_counter: usize,
-    // the stack pointer, points to the current index in the stack
+    /// the stack pointer, points to the current index in the stack
     pub stack_pointer: usize,
-    // the call stack, stores return addresses from subroutines
+    /// the call stack, stores return addresses from subroutines
     pub stack: [u16; STACK_LENGTH],
+    /// strictly for early testing, will be removed later
+    pub program_length: usize,
 }
 
 impl Cpu {
@@ -101,8 +103,8 @@ impl Cpu {
 
         let mut memory = [0u8; MEMORY_LENGTH];
 
-        for (i, x) in buf.into_iter().enumerate() {
-            memory[USER_PROGRAM_START_ADDR + i] = x;
+        for (i, x) in buf.iter().enumerate() {
+            memory[USER_PROGRAM_START_ADDR + i] = *x;
         }
 
         // copy the font set into system memory
@@ -119,6 +121,7 @@ impl Cpu {
             program_counter: USER_PROGRAM_START_ADDR,
             stack_pointer: 0,
             stack: [0u16; STACK_LENGTH],
+            program_length: buf.len(),
         })
     }
 }
