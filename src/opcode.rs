@@ -67,14 +67,14 @@ impl OpCode {
                 match opcode {
                     0x00E0 => Some(OpCode::new(opcode, args, "CLS".to_owned(), OpCode::opcode_cls)),
                     0x00EE => Some(OpCode::new(opcode, args, "RET".to_owned(), OpCode::opcode_ret)),
-                    _ => Some(OpCode::new(opcode, args, format!("SYS {:2X}", args.nnn), OpCode::opcode_sys))
+                    _ => Some(OpCode::new(opcode, args, format!("SYS {:3X}", args.nnn), OpCode::opcode_sys))
                 }
             },
             0x1000 => {
-                Some(OpCode::new(opcode, args, format!("JP {:2X}", args.nnn), OpCode::opcode_jp_addr))
+                Some(OpCode::new(opcode, args, format!("JP {:3X}", args.nnn), OpCode::opcode_jp_addr))
             },
             0x2000 => {
-                Some(OpCode::new(opcode, args, format!("CALL {:2X}", args.nnn), OpCode::opcode_call_addr))
+                Some(OpCode::new(opcode, args, format!("CALL {:3X}", args.nnn), OpCode::opcode_call_addr))
             },
             0x3000 => {
                 Some(OpCode::new(opcode, args, format!("SE V{:X}, {:2X}", args.x, args.kk), OpCode::opcode_se_vx_byte))
@@ -92,28 +92,57 @@ impl OpCode {
                 Some(OpCode::new(opcode, args, format!("ADD V{:X}, {:2X}", args.x, args.kk), OpCode::opcode_add_vx_byte))
             },
             0x8000 => {
-                None
+                match args.n {
+                    0x0 => Some(OpCode::new(opcode, args, format!("LD V{:X}, V{:X}", args.x, args.y), OpCode::opcode_ld_vx_vy)),
+                    0x1 => Some(OpCode::new(opcode, args, format!("OR V{:X}, V{:X}", args.x, args.y), OpCode::opcode_or_vx_vy)),
+                    0x2 => Some(OpCode::new(opcode, args, format!("AND V{:X}, V{:X}", args.x, args.y), OpCode::opcode_and_vx_vy)),
+                    0x3 => Some(OpCode::new(opcode, args, format!("XOR V{:X}, V{:X}", args.x, args.y), OpCode::opcode_xor_vx_vy)),
+                    0x4 => Some(OpCode::new(opcode, args, format!("ADD V{:X}, V{:X}", args.x, args.y), OpCode::opcode_add_vx_vy)),
+                    0x5 => Some(OpCode::new(opcode, args, format!("SUB V{:X}, V{:X}", args.x, args.y), OpCode::opcode_sub_vx_vy)),
+                    0x6 => Some(OpCode::new(opcode, args, format!("SHR V{:X}, V{:X}", args.x, args.y), OpCode::opcode_shr_vx_vy)),
+                    0x7 => Some(OpCode::new(opcode, args, format!("SUBN V{:X}, V{:X}", args.x, args.y), OpCode::opcode_subn_vx_vy)),
+                    0xE => Some(OpCode::new(opcode, args, format!("SHL V{:X}, V{:X}", args.x, args.y), OpCode::opcode_shl_vx_vy)),
+                    _ => None
+                }
             },
             0x9000 => {
-                None
+                match args.n {
+                    0x0 => Some(OpCode::new(opcode, args, format!("SNE V{:X}, V{:X}", args.x, args.y), OpCode::opcode_sne_vx_vy)),
+                    _ => None
+                }
             },
             0xA000 => {
-                None
+                Some(OpCode::new(opcode, args, format!("LD I, {:3X}", args.nnn), OpCode::opcode_ld_i_addr))
             },
             0xB000 => {
-                None
+                Some(OpCode::new(opcode, args, format!("JP V0, {:3X}", args.nnn), OpCode::opcode_jp_v0_addr))
             },
             0xC000 => {
-                None
+                Some(OpCode::new(opcode, args, format!("RND V{:X}, {:2X}", args.x, args.kk), OpCode::opcode_rnd_vx_byte))
             },
             0xD000 => {
-                None
+                Some(OpCode::new(opcode, args, format!("DRW V{:X}, V{:X}, {:X}", args.x, args.y, args.n), OpCode::opcode_drw_vx_vy_nibble))
             },
             0xE000 => {
-                None
+                match args.kk {
+                    0x9E => Some(OpCode::new(opcode, args, format!("SKP V{:X}", args.x), OpCode::opcode_skp_vx)),
+                    0xA1 => Some(OpCode::new(opcode, args, format!("SKNP V{:X}", args.x), OpCode::opcode_sknp_vx)),
+                    _ => None
+                }
             },
             0xF000 => {
-                None
+                match args.kk {
+                    0x07 => Some(OpCode::new(opcode, args, format!("LD V{:X}, DT", args.x), OpCode::opcode_ld_vx_dt)),
+                    0x0A => Some(OpCode::new(opcode, args, format!("LD V{:X}, K", args.x), OpCode::opcode_ld_vx_k)),
+                    0x15 => Some(OpCode::new(opcode, args, format!("LD DT, V{:X}", args.x), OpCode::opcode_ld_dt_vx)),
+                    0x18 => Some(OpCode::new(opcode, args, format!("LD ST, V{:X}", args.x), OpCode::opcode_ld_st_vx)),
+                    0x1E => Some(OpCode::new(opcode, args, format!("ADD I, V{:X}", args.x), OpCode::opcode_add_i_vx)),
+                    0x29 => Some(OpCode::new(opcode, args, format!("LD F, V{:X}", args.x), OpCode::opcode_ld_f_vx)),
+                    0x33 => Some(OpCode::new(opcode, args, format!("LD B, V{:X}", args.x), OpCode::opcode_ld_b_vx)),
+                    0x55 => Some(OpCode::new(opcode, args, format!("LD [I], V{:X}", args.x), OpCode::opcode_ld_i_vx)),
+                    0x65 => Some(OpCode::new(opcode, args, format!("LD V{:X}, [I]", args.x), OpCode::opcode_ld_vx_i)),
+                    _ => None
+                }
             },
             _ => None
         }
@@ -121,7 +150,7 @@ impl OpCode {
 
     // -------------------------------------------------------------
     // Below are the implementations for each of the opcodes. These
-    // functions are the subjects of the function pointer in each
+    // functions are the subjects of the function pointers in each
     // OpCode object.
     // -------------------------------------------------------------
 
