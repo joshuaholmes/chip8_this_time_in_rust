@@ -7,6 +7,7 @@ use std::env;
 
 mod cpu;
 mod opcode;
+mod display;
 
 use cpu::Cpu;
 
