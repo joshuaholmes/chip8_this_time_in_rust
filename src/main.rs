@@ -16,7 +16,10 @@ fn main() {
     let args: Vec<_> = env::args().collect();
     let filename = &args[1];
 
-    let cpu = Cpu::init_from_file_path(filename);
+    let cpu = match Cpu::init_from_file_path(filename) {
+        Err(e) => panic!("Failed to load user program. Error message: {:?}", e),
+        Ok(v) => v
+    };
 
-    println!("Done");
+    println!("Done loading user program.");
 }
