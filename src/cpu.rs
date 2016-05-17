@@ -2,10 +2,12 @@
 // Author: Joshua Holmes
 //
 
+use std::cmp::Ordering;
 use std::error::Error;
 use std::fs::File;
 use std::io::{self, Read};
 use std::path::Path;
+use std::time::{SystemTime, Duration};
 
 use opcode::OpCode;
 
@@ -68,6 +70,8 @@ pub struct Cpu {
     pub stack: [u16; STACK_LENGTH],
     /// use this to know if the PC is past the end of the program
     pub program_length: usize,
+    /// the timestamp of the last timer decrement
+    last_timer_decrease: SystemTime,
 }
 
 impl Cpu {
@@ -124,6 +128,7 @@ impl Cpu {
             stack_pointer: 0,
             stack: [0u16; STACK_LENGTH],
             program_length: buf.len(),
+            last_timer_decrease: SystemTime::now(),
         })
     }
 
@@ -143,6 +148,25 @@ impl Cpu {
 
         println!("{}", opcode.disasm_str);
         (opcode.operation)(&opcode.args, &mut *self);
+
+        // see if we need to decrement the timers
+        let curr_time = SystemTime::now();
+
+        match curr_time.duration_since(self.last_timer_decrease).unwrap().cmp(&Duration::new(0, 16_666_666)) {
+            Ordering::Greater => {
+                // decrement the timers
+                if self.delay_timer > 0 {
+                    self.delay_timer -= 1;
+                }
+
+                if self.sound_timer > 0 {
+                    self.sound_timer -= 1;
+                }
+
+                self.last_timer_decrease = curr_time;
+            },
+            _ => ()
+        }
 
         true
     }
