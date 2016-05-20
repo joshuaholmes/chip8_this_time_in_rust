@@ -204,7 +204,7 @@ impl OpCode {
     /// "SE Vx, byte" opcode. Skip next instruction if Vx = kk.
     fn opcode_se_vx_byte(args: &OpCodeArgs, cpu: &mut Cpu) {
         if cpu.data_registers[args.x] == args.kk {
-            cpu.program_counter += INSTR_SIZE * 2;
+            cpu.program_counter += INSTR_SIZE;
         }
 
         cpu.program_counter += INSTR_SIZE;
@@ -214,7 +214,7 @@ impl OpCode {
     /// "SNE Vx, byte" opcode. Skip next instruction if Vx != kk.
     fn opcode_sne_vx_byte(args: &OpCodeArgs, cpu: &mut Cpu) {
         if cpu.data_registers[args.x] != args.kk {
-            cpu.program_counter += INSTR_SIZE * 2;
+            cpu.program_counter += INSTR_SIZE;
         }
 
         cpu.program_counter += INSTR_SIZE;
@@ -224,7 +224,7 @@ impl OpCode {
     /// "SE Vx, Vy" opcode. Skip next instruction if Vx = Vy.
     fn opcode_se_vx_vy(args: &OpCodeArgs, cpu: &mut Cpu) {
         if cpu.data_registers[args.x] == cpu.data_registers[args.y] {
-            cpu.program_counter += INSTR_SIZE * 2;
+            cpu.program_counter += INSTR_SIZE;
         }
 
         cpu.program_counter += INSTR_SIZE;
@@ -327,8 +327,10 @@ impl OpCode {
     /// "SNE Vx, Vy" opcode. Skip next instruction if Vx != Vy.
     fn opcode_sne_vx_vy(args: &OpCodeArgs, cpu: &mut Cpu) {
         if cpu.data_registers[args.x] != cpu.data_registers[args.y] {
-            cpu.program_counter += INSTR_SIZE * 2;
+            cpu.program_counter += INSTR_SIZE;
         }
+
+        cpu.program_counter += INSTR_SIZE;
     }
 
     /// 0xAnnn
