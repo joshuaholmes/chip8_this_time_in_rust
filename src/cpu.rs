@@ -14,9 +14,9 @@ use opcode::OpCode;
 /// How many bytes of system memory there are
 pub const MEMORY_LENGTH: usize = 0xFFF;
 /// How many items our stack holds
-pub const STACK_LENGTH: usize = 0xF;
+pub const STACK_LENGTH: usize = 0x10;
 /// The number of data registers we have
-pub const NUM_REGISTERS: usize = 0xF;
+pub const NUM_REGISTERS: usize = 0x10;
 /// The address at which the system's font data starts in memory
 pub const FONT_SET_START_ADDR: usize = 0x000;
 /// The address in memory where the user program begins
@@ -67,7 +67,7 @@ pub struct Cpu {
     /// the stack pointer, points to the current index in the stack
     pub stack_pointer: usize,
     /// the call stack, stores return addresses from subroutines
-    pub stack: [u16; STACK_LENGTH],
+    pub stack: [usize; STACK_LENGTH],
     /// use this to know if the PC is past the end of the program
     pub program_length: usize,
     /// the timestamp of the last timer decrement
@@ -126,7 +126,7 @@ impl Cpu {
             sound_timer: 0,
             program_counter: USER_PROGRAM_START_ADDR,
             stack_pointer: 0,
-            stack: [0u16; STACK_LENGTH],
+            stack: [0; STACK_LENGTH],
             program_length: buf.len(),
             last_timer_decrease: SystemTime::now(),
         })
