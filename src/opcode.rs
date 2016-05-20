@@ -290,8 +290,14 @@ impl OpCode {
     /// 0x8xy5
     /// "SUB Vx, Vy" opcode. Set Vx = Vx - Vy, set VF = NOT borrow.
     fn opcode_sub_vx_vy(args: &OpCodeArgs, cpu: &mut Cpu) {
-        cpu.data_registers[0xF] = if cpu.data_registers[args.x] > cpu.data_registers[args.y] { 1 } else  { 0 };
-        cpu.data_registers[args.x] -= cpu.data_registers[args.y];
+        // deal with integer underflow since Rust strictly enforces underflow checks in debug mode
+        if cpu.data_registers[args.x] > cpu.data_registers[args.y] {
+            cpu.data_registers[0xF] = 1;
+            cpu.data_registers[args.x] -= cpu.data_registers[args.y];
+        } else {
+            cpu.data_registers[0xF] = 0;
+            cpu.data_registers[args.x] = 0xFF + cpu.data_registers[args.x] - cpu.data_registers[args.y];
+        }
 
         cpu.program_counter += INSTR_SIZE;
     }
