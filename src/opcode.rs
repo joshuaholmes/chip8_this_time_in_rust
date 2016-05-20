@@ -241,7 +241,7 @@ impl OpCode {
     /// 0x7xkk
     /// "ADD Vx, byte" opcode. Set Vx = Vx + kk.
     fn opcode_add_vx_byte(args: &OpCodeArgs, cpu: &mut Cpu) {
-        cpu.data_registers[args.x] += args.kk;
+        cpu.data_registers[args.x] = (cpu.data_registers[args.x] + args.kk) % 0xFF;
 
         cpu.program_counter += INSTR_SIZE;
     }
