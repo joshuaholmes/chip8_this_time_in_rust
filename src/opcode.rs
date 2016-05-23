@@ -156,7 +156,6 @@ impl OpCode {
     // OpCode object.
     // -------------------------------------------------------------
 
-
     /// 0x0nnn
     /// "SYS addr" opcode. We don't *really* support this, nor does anyone else.
     fn opcode_sys(args: &OpCodeArgs, cpu: &mut Cpu) {
@@ -241,7 +240,8 @@ impl OpCode {
     /// 0x7xkk
     /// "ADD Vx, byte" opcode. Set Vx = Vx + kk.
     fn opcode_add_vx_byte(args: &OpCodeArgs, cpu: &mut Cpu) {
-        cpu.data_registers[args.x] = (cpu.data_registers[args.x] + args.kk) % 0xFF;
+        let (value, _) = cpu.data_registers[args.x].overflowing_add(args.kk);
+        cpu.data_registers[args.x] = value;
 
         cpu.program_counter += INSTR_SIZE;
     }
@@ -281,8 +281,9 @@ impl OpCode {
     /// 0x8xy4
     /// "ADD Vx, Vy" opcode. Set Vx = Vx + Vy, set VF = carry.
     fn opcode_add_vx_vy(args: &OpCodeArgs, cpu: &mut Cpu) {
-        cpu.data_registers[args.x] = (cpu.data_registers[args.x] + cpu.data_registers[args.y]) % 0xFF;
-        cpu.data_registers[0xF] = if cpu.data_registers[args.x] < cpu.data_registers[args.y] { 1 } else { 0 };
+        let (value, flag) = cpu.data_registers[args.x].overflowing_add(cpu.data_registers[args.y]);
+        cpu.data_registers[args.x] = value;
+        cpu.data_registers[0xF] = if flag { 1 } else { 0 };
 
         cpu.program_counter += INSTR_SIZE;
     }
@@ -290,14 +291,9 @@ impl OpCode {
     /// 0x8xy5
     /// "SUB Vx, Vy" opcode. Set Vx = Vx - Vy, set VF = NOT borrow.
     fn opcode_sub_vx_vy(args: &OpCodeArgs, cpu: &mut Cpu) {
-        // deal with integer underflow since Rust strictly enforces underflow checks in debug mode
-        if cpu.data_registers[args.x] > cpu.data_registers[args.y] {
-            cpu.data_registers[0xF] = 1;
-            cpu.data_registers[args.x] -= cpu.data_registers[args.y];
-        } else {
-            cpu.data_registers[0xF] = 0;
-            cpu.data_registers[args.x] = 0xFF + cpu.data_registers[args.x] - cpu.data_registers[args.y];
-        }
+        let (value, flag) = cpu.data_registers[args.x].overflowing_sub(cpu.data_registers[args.y]);
+        cpu.data_registers[args.x] = value;
+        cpu.data_registers[0xF] = if flag { 0 } else { 1 };
 
         cpu.program_counter += INSTR_SIZE;
     }
@@ -305,21 +301,28 @@ impl OpCode {
     /// 0x8xy6
     /// "SHR Vx, Vy" opcode. Set Vx = Vy SHR 1.
     fn opcode_shr_vx_vy(args: &OpCodeArgs, cpu: &mut Cpu) {
-        // TODO
+        cpu.data_registers[0xF] = cpu.data_registers[args.y] & 0x1;
+        cpu.data_registers[args.x] = cpu.data_registers[args.y] >> 1;
+
         cpu.program_counter += INSTR_SIZE;
     }
 
     /// 0x8xy7
     /// "SUBN Vx, Vy" opcode. Set Vx = Vy - Vx, set VF = NOT borrow.
     fn opcode_subn_vx_vy(args: &OpCodeArgs, cpu: &mut Cpu) {
-        // TODO
+        let (value, flag) = cpu.data_registers[args.y].overflowing_sub(cpu.data_registers[args.x]);
+        cpu.data_registers[args.x] = value;
+        cpu.data_registers[0xF] = if flag { 0 } else { 1 };
+
         cpu.program_counter += INSTR_SIZE;
     }
 
     /// 0x8xyE
     /// "SHL Vx, Vy" opcode. Set Vx = Vy SHL 1.
     fn opcode_shl_vx_vy(args: &OpCodeArgs, cpu: &mut Cpu) {
-        // TODO
+        cpu.data_registers[0xF] = cpu.data_registers[args.y] >> 7;
+        cpu.data_registers[args.x] = cpu.data_registers[args.y] << 1;
+
         cpu.program_counter += INSTR_SIZE;
     }
 
