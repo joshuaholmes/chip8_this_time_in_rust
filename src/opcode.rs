@@ -339,21 +339,22 @@ impl OpCode {
     /// 0xAnnn
     /// "LD I, addr" opcode. Set I = nnn.
     fn opcode_ld_i_addr(args: &OpCodeArgs, cpu: &mut Cpu) {
-        // TODO
+        cpu.i_register = args.nnn;
+
         cpu.program_counter += INSTR_SIZE;
     }
 
     /// 0xBnnn
     /// "JP V0, addr" opcode. Jump to location nnn + V0.
     fn opcode_jp_v0_addr(args: &OpCodeArgs, cpu: &mut Cpu) {
-        // TODO
-        cpu.program_counter += INSTR_SIZE;
+        cpu.program_counter = args.nnn + (cpu.data_registers[0x0] as usize);
     }
 
     /// 0xCxkk
     /// "RND Vx, byte" opcode. Set Vx = random byte AND kk.
     fn opcode_rnd_vx_byte(args: &OpCodeArgs, cpu: &mut Cpu) {
-        // TODO
+        cpu.data_registers[args.x] = cpu.get_random_byte() & args.kk;
+
         cpu.program_counter += INSTR_SIZE;
     }
 
@@ -382,7 +383,8 @@ impl OpCode {
     /// 0xFx07
     /// "LD Vx, DT" opcode. Set Vx = delay timer value.
     fn opcode_ld_vx_dt(args: &OpCodeArgs, cpu: &mut Cpu) {
-        // TODO
+        cpu.data_registers[args.x] = cpu.delay_timer;
+
         cpu.program_counter += INSTR_SIZE;
     }
 
@@ -396,21 +398,24 @@ impl OpCode {
     /// 0xFx15
     /// "LD DT, Vx" opcode. Set delay timer = Vx.
     fn opcode_ld_dt_vx(args: &OpCodeArgs, cpu: &mut Cpu) {
-        // TODO
+        cpu.delay_timer = cpu.data_registers[args.x];
+
         cpu.program_counter += INSTR_SIZE;
     }
 
     /// 0xFx18
     /// "LD ST, Vx" opcode. Set sound timer = Vx.
     fn opcode_ld_st_vx(args: &OpCodeArgs, cpu: &mut Cpu) {
-        // TODO
+        cpu.sound_timer = cpu.data_registers[args.x];
+
         cpu.program_counter += INSTR_SIZE;
     }
 
     /// 0xFx1E
     /// "ADD I, Vx" opcode. Set I = I + Vx.
     fn opcode_add_i_vx(args: &OpCodeArgs, cpu: &mut Cpu) {
-        // TODO
+        cpu.i_register += cpu.data_registers[args.x] as usize;
+
         cpu.program_counter += INSTR_SIZE;
     }
 

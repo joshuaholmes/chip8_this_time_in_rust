@@ -11,6 +11,8 @@ mod display;
 
 use cpu::*;
 
+extern crate rand;
+
 fn main() {
     // get the program filename from the commandline and load it up
     let args: Vec<_> = env::args().collect();

@@ -2,6 +2,8 @@
 // Author: Joshua Holmes
 //
 
+use rand;
+use rand::distributions::{IndependentSample, Range};
 use std::cmp::Ordering;
 use std::error::Error;
 use std::fs::File;
@@ -57,7 +59,7 @@ pub struct Cpu {
     /// the system data registers, V0 through VF
     pub data_registers: [u8; NUM_REGISTERS],
     /// the I register, used for storing addresses
-    pub i_register: u16,
+    pub i_register: usize,
     /// the delay timer, decreased at 60Hz by default when non-zero
     pub delay_timer: u8,
     /// the sound timer, decreased at 60Hz by default when non-zero
@@ -170,4 +172,10 @@ impl Cpu {
 
         true
     }
+
+    /// Returns a random byte, used for the RND opcode
+    pub fn get_random_byte(&self) -> u8 {
+        let mut rng = rand::thread_rng();
+        Range::new(0, 256).ind_sample(&mut rng) as u8
+    } 
 }
