@@ -422,28 +422,39 @@ impl OpCode {
     /// 0xFx29
     /// "LD F, Vx" opcode. Set I = location of sprite for digit Vx.
     fn opcode_ld_f_vx(args: &OpCodeArgs, cpu: &mut Cpu) {
-        // TODO
+        cpu.i_register = (cpu.data_registers[args.x] as usize) * 5;
+
         cpu.program_counter += INSTR_SIZE;
     }
 
     /// 0xFx33
     /// "LD B, Vx" opcode. Store BCD representation of Vx in memory locations I, I+1, and I+2.
     fn opcode_ld_b_vx(args: &OpCodeArgs, cpu: &mut Cpu) {
-        // TODO
+        let val = cpu.data_registers[args.x];
+        cpu.memory[cpu.i_register] = val / 100;
+        cpu.memory[cpu.i_register + 1] = (val / 10) % 10;
+        cpu.memory[cpu.i_register + 2] = (val % 100) % 10;
+
         cpu.program_counter += INSTR_SIZE;
     }
 
     /// 0xFx55
     /// "LD [I], Vx" opcode. Store registers V0 through Vx in memory starting at location I.
     fn opcode_ld_i_vx(args: &OpCodeArgs, cpu: &mut Cpu) {
-        // TODO
+        for i in 0..args.x + 1 {
+            cpu.memory[cpu.i_register + i] = cpu.data_registers[i];
+        }
+
         cpu.program_counter += INSTR_SIZE;
     }
 
     /// 0xFx65
     /// "LD Vx, [I]" opcode. Read registers V0 through Vx from memory starting at location I.
     fn opcode_ld_vx_i(args: &OpCodeArgs, cpu: &mut Cpu) {
-        // TODO
+        for i in 0..args.x + 1 {
+            cpu.data_registers[i] = cpu.memory[cpu.i_register + i];
+        }
+
         cpu.program_counter += INSTR_SIZE;
     }
 }
