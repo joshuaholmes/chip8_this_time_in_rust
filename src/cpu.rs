@@ -23,6 +23,10 @@ pub const NUM_REGISTERS: usize = 0x10;
 pub const FONT_SET_START_ADDR: usize = 0x000;
 /// The address in memory where the user program begins
 pub const USER_PROGRAM_START_ADDR: usize = 0x200;
+/// The number of pixels in our virtual display width
+pub const VIRTUAL_DISPLAY_WIDTH: usize = 64;
+/// The number of pixels in our virtual display height
+pub const VIRTUAL_DISPLAY_HEIGHT: usize = 32;
 /// The fontset of the interpreter that can be referenced by user programs
 pub const FONT_SET: [u8; 80] = [ 0xF0, 0x90, 0x90, 0x90, 0xF0,   // 0x0
                                  0x20, 0x60, 0x20, 0x20, 0x70,   // 0x1
@@ -72,6 +76,8 @@ pub struct Cpu {
     pub stack: [usize; STACK_LENGTH],
     /// use this to know if the PC is past the end of the program
     pub program_length: usize,
+    /// the system's "VRAM" -- the virtual screen buffer
+    pub vram: [[bool; VIRTUAL_DISPLAY_WIDTH]; VIRTUAL_DISPLAY_HEIGHT],
     /// the timestamp of the last timer decrement
     last_timer_decrease: SystemTime,
 }
@@ -131,6 +137,7 @@ impl Cpu {
             stack: [0; STACK_LENGTH],
             program_length: buf.len(),
             last_timer_decrease: SystemTime::now(),
+            vram: [[false; VIRTUAL_DISPLAY_WIDTH]; VIRTUAL_DISPLAY_HEIGHT],
         })
     }
 

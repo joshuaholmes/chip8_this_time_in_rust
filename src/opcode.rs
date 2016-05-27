@@ -165,7 +165,7 @@ impl OpCode {
     /// 0x00E0
     /// "CLS" opcode. Clears the display.
     fn opcode_cls(args: &OpCodeArgs, cpu: &mut Cpu) {
-        // TODO
+        cpu.vram = [[false; cpu::VIRTUAL_DISPLAY_WIDTH]; cpu::VIRTUAL_DISPLAY_HEIGHT];
         cpu.program_counter += INSTR_SIZE;
     }
 
