@@ -178,7 +178,7 @@ impl OpCode {
         }
 
         cpu.stack_pointer -= 1;
-        cpu.program_counter = cpu.stack[cpu.stack_pointer];
+        cpu.program_counter = cpu.stack[cpu.stack_pointer] + INSTR_SIZE;
     }
 
     /// 0x1nnn
@@ -380,6 +380,7 @@ impl OpCode {
         }
 
         cpu.data_registers[0xF] = collision;
+        cpu.draw_flag = true;
         
         cpu.program_counter += INSTR_SIZE;
     }
@@ -387,14 +388,20 @@ impl OpCode {
     /// 0xEx9E
     /// "SKP Vx" opcode. Skip next instruction if key with the value of Vx is pressed.
     fn opcode_skp_vx(args: &OpCodeArgs, cpu: &mut Cpu) {
-        // TODO
+        if cpu.keyboard.is_pressed(cpu.data_registers[args.x]) {
+            cpu.program_counter += INSTR_SIZE;
+        }
+
         cpu.program_counter += INSTR_SIZE;
     }
 
     /// 0xExA1
     /// "SKNP Vx" opcode. Skip next instruction if key with the value of Vx is not pressed.
     fn opcode_sknp_vx(args: &OpCodeArgs, cpu: &mut Cpu) {
-        // TODO
+        if !cpu.keyboard.is_pressed(cpu.data_registers[args.x]) {
+            cpu.program_counter += INSTR_SIZE;
+        }
+
         cpu.program_counter += INSTR_SIZE;
     }
 
@@ -409,8 +416,15 @@ impl OpCode {
     /// 0xFx0A
     /// "LD Vx, K" opcode. Wait for a key press, store the value of the key in Vx.
     fn opcode_ld_vx_k(args: &OpCodeArgs, cpu: &mut Cpu) {
-        // TODO
-        cpu.program_counter += INSTR_SIZE;
+        // check for the first pressed key. if no keys are pressed, simply
+        // don't increase the program counter
+        for i in 0u8..16 {
+            if cpu.keyboard.is_pressed(i) {
+                cpu.data_registers[args.x] = i;
+                cpu.program_counter += INSTR_SIZE;
+                break;
+            }
+        }
     }
 
     /// 0xFx15

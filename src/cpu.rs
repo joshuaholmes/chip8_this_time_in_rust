@@ -9,9 +9,11 @@ use std::error::Error;
 use std::fs::File;
 use std::io::{self, Read};
 use std::path::Path;
+use std::thread;
 use std::time::{SystemTime, Duration};
 
 use display::Display;
+use keyboard::Keyboard;
 use opcode::OpCode;
 
 /// How many bytes of system memory there are
@@ -79,6 +81,10 @@ pub struct Cpu {
     pub program_length: usize,
     /// the system's "VRAM" -- the virtual screen buffer
     pub vram: [[bool; VIRTUAL_DISPLAY_WIDTH]; VIRTUAL_DISPLAY_HEIGHT],
+    /// the flag that says whether we need to redraw the screen
+    pub draw_flag: bool,
+    /// the system's keyboard
+    pub keyboard: Keyboard,
     /// the timestamp of the last timer decrement
     last_timer_decrease: SystemTime,
 }
@@ -139,6 +145,8 @@ impl Cpu {
             program_length: buf.len(),
             last_timer_decrease: SystemTime::now(),
             vram: [[false; VIRTUAL_DISPLAY_WIDTH]; VIRTUAL_DISPLAY_HEIGHT],
+            draw_flag: false,
+            keyboard: Keyboard::new(),
         })
     }
 
@@ -156,7 +164,7 @@ impl Cpu {
             None => panic!("Error! Unimplemented opcode 0x{:4X}", instruction),
         };
 
-        println!("{}", opcode.disasm_str);
+        //println!("{}", opcode.disasm_str);
         (opcode.operation)(&opcode.args, &mut *self);
 
         // see if we need to decrement the timers and draw the screen (both at 60Hz)
@@ -174,12 +182,18 @@ impl Cpu {
                 }
 
                 self.last_timer_decrease = curr_time;
-
-                // draw the screen
-                display.draw_screen(&mut *self);
             },
             _ => ()
         }
+
+        // refresh the screen, if necessary
+        if self.draw_flag {
+            display.draw_screen(&mut *self);
+            self.draw_flag = false;
+        }
+
+        // terrible hack to make this thing run more slowly until proper timers are implemented
+        thread::sleep(Duration::from_millis(2));
 
         true
     }

@@ -9,16 +9,11 @@ use cpu::Cpu;
 use sdl2::Sdl;
 use sdl2::pixels::Color;
 use sdl2::pixels::PixelFormatEnum;
-use sdl2::rect::Rect;
 use sdl2::render::Renderer;
 use sdl2::render::Texture;
 
 /// The display scale in relation to the native resolution of the system
 pub const DISPLAY_SCALE: u32 = 20;
-/// The color white
-pub const WHITE: Color = Color::RGB(255, 255, 255);
-/// The color black
-pub const BLACK: Color = Color::RGB(0, 0, 0);
 
 /// A structure to manage displaying the screen based on the system's VRAM
 pub struct Display<'a> {
@@ -43,11 +38,11 @@ impl<'a> Display<'a> {
 
         let mut renderer = window.renderer().build().unwrap(); 
 
-        renderer.set_draw_color(BLACK);
+        renderer.set_draw_color(Color::RGB(0, 0, 0));
         renderer.clear();
         renderer.present();
 
-        let mut texture = renderer.create_texture_streaming(
+        let texture = renderer.create_texture_streaming(
             PixelFormatEnum::RGB24, cpu::VIRTUAL_DISPLAY_WIDTH as u32, cpu::VIRTUAL_DISPLAY_HEIGHT as u32).unwrap();
 
         Display {

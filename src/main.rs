@@ -11,6 +11,7 @@ use std::env;
 mod cpu;
 mod opcode;
 mod display;
+mod keyboard;
 
 use cpu::Cpu;
 use display::Display;
@@ -37,10 +38,14 @@ fn main() {
     'running: while cpu.fetch_and_execute(&mut display) {
         for event in event_pump.poll_iter() {
             match event {
-                Event::Quit {..} 
-                | Event::KeyDown { keycode: Some(Keycode::Escape), .. } => {
-                    break 'running
+                Event::Quit { .. } => break 'running,
+                Event::KeyDown { keycode: Some(key), .. } => {
+                    match key {
+                        Keycode::Escape => break 'running,
+                        _ => cpu.keyboard.update_key(key, true),
+                    }
                 },
+                Event::KeyUp { keycode: Some(key), .. } => cpu.keyboard.update_key(key, false),
                 _ => {}
             }
         }
