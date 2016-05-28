@@ -13,19 +13,17 @@ use sdl2::render::Renderer;
 use sdl2::render::Texture;
 
 /// The display scale in relation to the native resolution of the system
-pub const DISPLAY_SCALE: u32 = 20;
+pub const DISPLAY_SCALE: u32 = 30;
 
 /// A structure to manage displaying the screen based on the system's VRAM
 pub struct Display<'a> {
-    pub sdl_context: Sdl,
     renderer: Renderer<'a>,
     texture: Texture,
 }
 
 impl<'a> Display<'a> {
     /// Construct a new Display object
-    pub fn new() -> Display<'a> {
-        let sdl_context = sdl2::init().unwrap();
+    pub fn new(sdl_context: &Sdl) -> Display<'a> {
         let video_subsystem = sdl_context.video().unwrap();
 
         let window = video_subsystem.window("CHIP-8: This Time In Rust", 
@@ -38,7 +36,7 @@ impl<'a> Display<'a> {
 
         let mut renderer = window.renderer().build().unwrap(); 
 
-        renderer.set_draw_color(Color::RGB(0, 0, 0));
+        renderer.set_draw_color(Color::RGB(16, 113, 145));
         renderer.clear();
         renderer.present();
 
@@ -46,7 +44,6 @@ impl<'a> Display<'a> {
             PixelFormatEnum::RGB24, cpu::VIRTUAL_DISPLAY_WIDTH as u32, cpu::VIRTUAL_DISPLAY_HEIGHT as u32).unwrap();
 
         Display {
-            sdl_context: sdl_context,
             renderer: renderer,
             texture: texture,
         }
@@ -61,15 +58,14 @@ impl<'a> Display<'a> {
                     let bit = cpu.vram[y][x];
                     let offset = (y * pitch) + (x * 3);
 
-                    buffer[offset] = 0x00;
-                    buffer[offset + 1] = if bit { 0xFF } else { 0x00 };
-                    buffer[offset + 2] = 0x00;
+                    buffer[offset] = if bit { 255 } else { 16 };
+                    buffer[offset + 1] = if bit { 255 } else { 113 };
+                    buffer[offset + 2] = if bit { 255 } else { 145 };
                 }
             }
         }).unwrap();
 
         // draw the texture
-        self.renderer.clear();
         self.renderer.copy(&self.texture, None, None);
         self.renderer.present();
     }

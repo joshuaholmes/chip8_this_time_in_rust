@@ -12,9 +12,11 @@ mod cpu;
 mod opcode;
 mod display;
 mod keyboard;
+mod audio;
 
 use cpu::Cpu;
 use display::Display;
+use audio::Audio;
 use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
 
@@ -28,14 +30,16 @@ fn main() {
         Ok(v) => v
     };
 
-    // initialize the window
-    let mut display = Display::new();
+    // initialize the window and audio systems
+    let sdl_context = sdl2::init().unwrap();
+    let mut display = Display::new(&sdl_context);
+    let mut audio = Audio::new(&sdl_context);
 
     // execute the program until the user presses escape
     println!("Done loading user program. Beginning execution.");
-    let mut event_pump = display.sdl_context.event_pump().unwrap();
+    let mut event_pump = sdl_context.event_pump().unwrap();
 
-    'running: while cpu.fetch_and_execute(&mut display) {
+    'running: while cpu.fetch_and_execute(&mut display, &mut audio) {
         for event in event_pump.poll_iter() {
             match event {
                 Event::Quit { .. } => break 'running,

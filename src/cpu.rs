@@ -14,6 +14,7 @@ use std::time::{SystemTime, Duration};
 
 use display::Display;
 use keyboard::Keyboard;
+use audio::Audio;
 use opcode::OpCode;
 
 /// How many bytes of system memory there are
@@ -151,7 +152,7 @@ impl Cpu {
     }
 
     /// Fetches one opcode from memory and executes it.
-    pub fn fetch_and_execute(&mut self, display: &mut Display) -> bool {
+    pub fn fetch_and_execute(&mut self, display: &mut Display, audio: &mut Audio) -> bool {
         // if the program counter is past the program, then we've completed execution
         if self.program_counter >= USER_PROGRAM_START_ADDR + self.program_length {
             return false;
@@ -179,6 +180,7 @@ impl Cpu {
 
                 if self.sound_timer > 0 {
                     self.sound_timer -= 1;
+                    //audio.beep();
                 }
 
                 self.last_timer_decrease = curr_time;

@@ -166,6 +166,8 @@ impl OpCode {
     /// "CLS" opcode. Clears the display.
     fn opcode_cls(args: &OpCodeArgs, cpu: &mut Cpu) {
         cpu.vram = [[false; cpu::VIRTUAL_DISPLAY_WIDTH]; cpu::VIRTUAL_DISPLAY_HEIGHT];
+        cpu.draw_flag = true;
+
         cpu.program_counter += INSTR_SIZE;
     }
 
@@ -299,10 +301,10 @@ impl OpCode {
     }
 
     /// 0x8xy6
-    /// "SHR Vx, Vy" opcode. Set Vx = Vy SHR 1.
+    /// "SHR Vx {, Vy}" opcode. Set Vx = Vx SHR 1.
     fn opcode_shr_vx_vy(args: &OpCodeArgs, cpu: &mut Cpu) {
-        cpu.data_registers[0xF] = cpu.data_registers[args.y] & 0x1;
-        cpu.data_registers[args.x] = cpu.data_registers[args.y] >> 1;
+        cpu.data_registers[0xF] = cpu.data_registers[args.x] & 0x1;
+        cpu.data_registers[args.x] >>= 1;
 
         cpu.program_counter += INSTR_SIZE;
     }
@@ -318,10 +320,10 @@ impl OpCode {
     }
 
     /// 0x8xyE
-    /// "SHL Vx, Vy" opcode. Set Vx = Vy SHL 1.
+    /// "SHL Vx {, Vy}" opcode. Set Vx = Vx SHL 1.
     fn opcode_shl_vx_vy(args: &OpCodeArgs, cpu: &mut Cpu) {
-        cpu.data_registers[0xF] = cpu.data_registers[args.y] >> 7;
-        cpu.data_registers[args.x] = cpu.data_registers[args.y] << 1;
+        cpu.data_registers[0xF] = cpu.data_registers[args.x] >> 7;
+        cpu.data_registers[args.x] = cpu.data_registers[args.x] << 1;
 
         cpu.program_counter += INSTR_SIZE;
     }
@@ -371,7 +373,7 @@ impl OpCode {
                 let x = (cpu.data_registers[args.x] as usize + i) % cpu::VIRTUAL_DISPLAY_WIDTH;
                 let y = (cpu.data_registers[args.y]as usize + j) % cpu::VIRTUAL_DISPLAY_HEIGHT;
 
-                if cpu.vram[y][x] {
+                if cpu.vram[y][x] && bit {
                     collision = 1u8;
                 }
 
@@ -446,7 +448,9 @@ impl OpCode {
     /// 0xFx1E
     /// "ADD I, Vx" opcode. Set I = I + Vx.
     fn opcode_add_i_vx(args: &OpCodeArgs, cpu: &mut Cpu) {
-        cpu.i_register += cpu.data_registers[args.x] as usize;
+        let (value, flag) = cpu.i_register.overflowing_add(cpu.data_registers[args.x] as usize);
+        cpu.i_register = value;
+        cpu.data_registers[0xF] = if flag { 1 } else { 0 };
 
         cpu.program_counter += INSTR_SIZE;
     }
