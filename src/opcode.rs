@@ -365,17 +365,17 @@ impl OpCode {
         let sprite = &cpu.memory[cpu.i_register..cpu.i_register + args.n as usize];
         let mut collision = 0u8;
 
-        for i in 0..args.n as usize {
-            for j in 0..8_usize {
-                let bit = (sprite[i] & (0x80 >> (j as u8))) != 0;
-                let x = (args.x + j) % cpu::VIRTUAL_DISPLAY_WIDTH;
-                let y = (args.y + i) % cpu::VIRTUAL_DISPLAY_HEIGHT;
+        for j in 0..args.n as usize {
+            for i in 0..8_usize {
+                let bit = (sprite[j] & (0x80 >> (i as u8))) != 0;
+                let x = (cpu.data_registers[args.x] as usize + i) % cpu::VIRTUAL_DISPLAY_WIDTH;
+                let y = (cpu.data_registers[args.y]as usize + j) % cpu::VIRTUAL_DISPLAY_HEIGHT;
 
-                if cpu.vram[x][y] {
+                if cpu.vram[y][x] {
                     collision = 1u8;
                 }
 
-                cpu.vram[x][y] ^= bit;
+                cpu.vram[y][x] ^= bit;
             }
         }
 

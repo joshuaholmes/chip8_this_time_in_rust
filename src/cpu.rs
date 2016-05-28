@@ -11,6 +11,7 @@ use std::io::{self, Read};
 use std::path::Path;
 use std::time::{SystemTime, Duration};
 
+use display::Display;
 use opcode::OpCode;
 
 /// How many bytes of system memory there are
@@ -142,7 +143,7 @@ impl Cpu {
     }
 
     /// Fetches one opcode from memory and executes it.
-    pub fn fetch_and_execute(&mut self) -> bool {
+    pub fn fetch_and_execute(&mut self, display: &mut Display) -> bool {
         // if the program counter is past the program, then we've completed execution
         if self.program_counter >= USER_PROGRAM_START_ADDR + self.program_length {
             return false;
@@ -158,7 +159,7 @@ impl Cpu {
         println!("{}", opcode.disasm_str);
         (opcode.operation)(&opcode.args, &mut *self);
 
-        // see if we need to decrement the timers
+        // see if we need to decrement the timers and draw the screen (both at 60Hz)
         let curr_time = SystemTime::now();
 
         match curr_time.duration_since(self.last_timer_decrease).unwrap().cmp(&Duration::new(0, 16_666_666)) {
@@ -173,6 +174,9 @@ impl Cpu {
                 }
 
                 self.last_timer_decrease = curr_time;
+
+                // draw the screen
+                display.draw_screen(&mut *self);
             },
             _ => ()
         }

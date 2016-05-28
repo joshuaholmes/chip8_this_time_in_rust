@@ -5,3 +5,4 @@ authors = ["Joshua Holmes <JoshuaDanielHolmes1991@gmail.com>"]
 
 [dependencies]
 rand = "0.3.14"
+sdl2 = "0.19"

@@ -2,6 +2,9 @@
 // Author: Joshua Holmes
 //
 
+extern crate rand;
+extern crate sdl2;
+
 use std::str;
 use std::env;
 
@@ -9,9 +12,10 @@ mod cpu;
 mod opcode;
 mod display;
 
-use cpu::*;
-
-extern crate rand;
+use cpu::Cpu;
+use display::Display;
+use sdl2::event::Event;
+use sdl2::keyboard::Keycode;
 
 fn main() {
     // get the program filename from the commandline and load it up
@@ -23,8 +27,24 @@ fn main() {
         Ok(v) => v
     };
 
-    // execute the program
-    println!("Done loading user program. Beginning execution.");
+    // initialize the window
+    let mut display = Display::new();
 
-    while cpu.fetch_and_execute() {}
+    // execute the program until the user presses escape
+    println!("Done loading user program. Beginning execution.");
+    let mut event_pump = display.sdl_context.event_pump().unwrap();
+
+    'running: while cpu.fetch_and_execute(&mut display) {
+        for event in event_pump.poll_iter() {
+            match event {
+                Event::Quit {..} 
+                | Event::KeyDown { keycode: Some(Keycode::Escape), .. } => {
+                    break 'running
+                },
+                _ => {}
+            }
+        }
+    }
+
+    println!("Program execution complete.");
 }
